@@ -21,7 +21,7 @@ function AppRoutes() {
 
       {/* Citizen routes */}
       <Route path="/" element={
-        <ProtectedRoute allowedRoles={['citizen', 'admin']}>
+        <ProtectedRoute allowedRoles={['citizen', 'authority', 'admin']}>
           <CitizenFeed />
         </ProtectedRoute>
       }/>

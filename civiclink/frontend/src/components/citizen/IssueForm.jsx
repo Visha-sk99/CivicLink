@@ -26,7 +26,7 @@ const IssueForm = ({ onClose, onCreated }) => {
       files.forEach(f => data.append('media', f));
 
       try {
-        await API.post('/issues', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+        await API.post('/issues', data, { headers: { 'Content-Type': 'multipart/form-data' , 'credentials' : "true"} });
         toast.success('Issue reported successfully!');
         onCreated();
         onClose();
