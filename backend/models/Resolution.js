@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const resolutionSchema = new mongoose.Schema({
-  issue:           { type: mongoose.Schema.Types.ObjectId, ref: 'Issue', required: true },
-  resolvedBy:      { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  issue:           { type: mongoose.Schema.Types.ObjectId, ref: 'Issue' },
+  resolvedBy:      { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   beforeImages:    [{ type: String }],
   afterImages:     [{ type: String }],
   contractorName:  { type: String },

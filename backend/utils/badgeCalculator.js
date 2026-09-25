@@ -1,27 +1,46 @@
-const Issue = require('../models/Issue');
-const User  = require('../models/User');
-
-const calculateBadges = async (authorityId) => {
-  const resolved = await Issue.find({ assignedTo: authorityId, status: 'resolved' });
-  const pending30 = await Issue.find({
-    assignedTo: authorityId,
-    status: 'pending',
-    createdAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
-  });
-
-  let score = 0;
-  score += resolved.length * 10;
-  score -= pending30.length * 5;
-
-  const totalUpvotes   = resolved.reduce((sum, i) => sum + i.upvotes, 0);
-  const totalDownvotes = resolved.reduce((sum, i) => sum + i.downvotes, 0);
-  const totalVotes     = totalUpvotes + totalDownvotes;
-  const satisfactionRate = totalVotes > 0 ? (totalUpvotes / totalVotes) * 100 : 0;
-
-  if (satisfactionRate >= 80) score += 20;
-
-  await User.findByIdAndUpdate(authorityId, { reputationScore: Math.max(0, score) });
-  return { score, resolved: resolved.length, pending30: pending30.length, satisfactionRate };
+// avgDays is in days (converted from ms)
+const getBadge = (totalResolved, avgDays) => {
+  if (!totalResolved || totalResolved === 0) {
+    return {
+      label: 'Inactive',
+      color: 'bg-gray-500/20 text-gray-400',
+      icon:  'Clock'
+    };
+  }
+  // avgDays < 0.125 = less than 3 hours
+  if (avgDays !== null && avgDays <= 0.125) {
+    return {
+      label: 'Fast Responder',
+      color: 'bg-green-500/20 text-green-400',
+      icon:  'Zap'
+    };
+  }
+  if (totalResolved > 10) {
+    return {
+      label: 'Quality Champion',
+      color: 'bg-yellow-500/20 text-yellow-400',
+      icon:  'Award'
+    };
+  }
+  if (totalResolved >= 5) {
+    return {
+      label: 'Issue Resolver',
+      color: 'bg-blue-500/20 text-blue-400',
+      icon:  'CheckCircle'
+    };
+  }
+  if (avgDays !== null && avgDays > 5) {
+    return {
+      label: 'Slow Performer',
+      color: 'bg-red-500/20 text-red-400',
+      icon:  'Clock'
+    };
+  }
+  return {
+    label: 'Active',
+    color: 'bg-purple-500/20 text-purple-400',
+    icon:  'Star'
+  };
 };
 
-module.exports = { calculateBadges };
+module.exports = { getBadge };
