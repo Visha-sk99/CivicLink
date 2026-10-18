@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import {
   ArrowLeft, ThumbsUp, ThumbsDown, Send,
   MapPin, Calendar, User, CheckCircle,
-  Clock, ArrowRight, ZoomIn, X
+   ArrowRight, ZoomIn, X
 } from 'lucide-react';
 
 const categoryColors = {
@@ -267,7 +267,7 @@ const IssueDetail = () => {
   if (!issue) return null;
 
   const isAuthority = user?.role === 'authority' || user?.role === 'admin';
-  const isAssigned  = issue.assignedTo?._id === user?._id || user?.role === 'admin';
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
