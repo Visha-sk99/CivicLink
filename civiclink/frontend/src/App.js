@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 
+import Landing from './pages/landing';          // ✅ fixed path
 import Login from './pages/Login';
 import Register from './pages/Register';
 import CitizenFeed from './pages/CitizenFeed';
@@ -10,9 +11,27 @@ import IssueDetail from './pages/IssueDetail';
 import AuthorityDashboard from './pages/AuthorityDashboard';
 import Analytics from './pages/Analytics';
 import Leaderboard from './pages/Leaderboard';
-import Profile from './pages/Profile'; // ✅ ADDED
+import Profile from './pages/Profile';
 
-import ProtectedRoute from './components/common/ProtectedRoute';
+import ProtectedRoute from './components/common/ProtectedRoute';;
+
+// ✅ ADDED: decides what "/" should render
+function HomeGate() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-gray-400 dark:text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return user ? <CitizenFeed /> : <Landing />;
+}
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -29,15 +48,8 @@ function AppRoutes() {
         element={!user ? <Register /> : <Navigate to="/" />}
       />
 
-      {/* Main Feed */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute allowedRoles={['citizen', 'authority', 'admin']}>
-            <CitizenFeed />
-          </ProtectedRoute>
-        }
-      />
+      {/* Landing (logged out) / Feed (logged in) */}
+      <Route path="/" element={<HomeGate />} />   {/* ✅ CHANGED */}
 
       {/* Issue Detail */}
       <Route

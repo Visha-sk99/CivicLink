@@ -1,5 +1,7 @@
 node_modules/
+backend/.env
 .env
-dist/
-build/
-.DS_Store
+*.env
+*.txt
+backend/node_modules/
+civiclink/frontend/node_modules/

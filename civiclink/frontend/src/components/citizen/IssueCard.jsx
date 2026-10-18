@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ThumbsUp, ThumbsDown, MessageCircle, MapPin } from 'lucide-react';
 import StatusBadge from '../common/StatusBadge';
@@ -14,16 +15,42 @@ const categoryColors = {
 
 const IssueCard = ({ issue, onVote }) => {
   const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+
+  const sendVote = async (voteType) => {
+    try {
+      return await API.post(`/votes/${issue._id}`, { voteType });
+    } catch (err) {
+      // fall back to the route style from the handoff doc: POST /votes/upvote
+      if (err.response?.status === 404) {
+        return await API.post(`/votes/${voteType}`, { issueId: issue._id, voteType });
+      }
+      throw err;
+    }
+  };
 
   const handleVote = async (e, voteType) => {
     e.stopPropagation();
+    if (busy) return;
+    setBusy(true);
+
     try {
-      await API.post(`/votes/${issue._id}`, { voteType });
-      toast.success(voteType === 'upvote' ? '👍 Upvoted!' : '👎 Downvoted!');
-      onVote();
-    } catch {
-      toast.error('Could not cast vote');
+      await sendVote(voteType);
+      toast.dismiss('vote-error');
+      toast.success(voteType === 'upvote' ? '👍 Upvoted!' : '👎 Downvoted!', { id: 'vote-ok' });
+    } catch (err) {
+      const status = err.response?.status;
+      const msg =
+        err.response?.data?.message ||
+        (err.response ? `Vote failed (${status})` : 'Cannot reach the server');
+      console.error('Vote failed:', status, err.config?.baseURL, err.config?.url, err.response?.data);
+      toast.error(msg, { id: 'vote-error' });
+      setBusy(false);
+      return;
     }
+
+    setBusy(false);
+    onVote?.(); // refresh the feed and side panels
   };
 
   return (
@@ -77,14 +104,16 @@ const IssueCard = ({ issue, onVote }) => {
         onClick={e => e.stopPropagation()}
       >
         <button
+          disabled={busy}
           onClick={(e) => handleVote(e, 'upvote')}
-          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 px-2.5 py-1 rounded-lg transition-all duration-200"
+          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 px-2.5 py-1 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ThumbsUp size={14}/> {issue.upvotes}
         </button>
         <button
+          disabled={busy}
           onClick={(e) => handleVote(e, 'downvote')}
-          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 px-2.5 py-1 rounded-lg transition-all duration-200"
+          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 px-2.5 py-1 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ThumbsDown size={14}/> {issue.downvotes}
         </button>

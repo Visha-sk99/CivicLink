@@ -1,0 +1,189 @@
+/* ========== CivicLink Landing — Design Tokens ========== */
+:root {
+  --navy: #0b0f1a;
+  --navy-2: #121826;
+  --navy-3: #1a2234;
+  --terracotta: #e8714a;
+  --terracotta-dark: #c45a35;
+  --sage: #7baf7b;
+  --cream: #f5edd6;
+  --cream-dim: #d9d0b8;
+  --gold: #c9a84c;
+  --gold-soft: #e8d59a;
+  --pending: #e8714a;
+  --progress: #c9a84c;
+  --resolved: #7baf7b;
+  --glass: rgba(18, 24, 38, 0.72);
+  --stroke: rgba(245, 237, 214, 0.12);
+  --font-display: "Syne", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+}
+
+/* Reset scoped to landing only */
+.cl-landing {
+  background: var(--navy);
+  color: var(--cream);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+.cl-landing h1,
+.cl-landing h2,
+.cl-landing h3,
+.cl-landing h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.cl-landing * {
+  box-sizing: border-box;
+}
+
+export default function CityScene({ parallax = 0 }) {
+  // parallax: 0–1 from scroll, parent can pass
+  const skyY = parallax * 10;
+  const midY = parallax * 28;
+  const fgY = parallax * 48;
+
+  return (
+    <div className="cl-city" aria-hidden="true">
+      {/* sky layer */}
+      <svg
+        className="cl-city__layer cl-city__sky"
+        style={{ transform: `translate3d(0, ${skyY}px, 0)` }}
+        viewBox="0 0 1440 600"
+        preserveAspectRatio="xMidYMax slice"
+      >
+        <defs>
+          <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#070a12" />
+            <stop offset="55%" stopColor="#0b0f1a" />
+            <stop offset="100%" stopColor="#151c2e" />
+          </linearGradient>
+        </defs>
+        <rect width="1440" height="600" fill="url(#skyGrad)" />
+        {/* stars / particles */}
+        {Array.from({ length: 40 }).map((_, i) => (
+          <circle
+            key={i}
+            className="cl-star"
+            cx={(i * 97) % 1440}
+            cy={(i * 53) % 280}
+            r={i % 5 === 0 ? 1.6 : 0.9}
+            fill="#F5EDD6"
+            opacity={0.25 + (i % 7) * 0.08}
+            style={{ animationDelay: `${(i % 10) * 0.4}s` }}
+          />
+        ))}
+        {/* moon */}
+        <circle cx="1180" cy="90" r="28" fill="#F5EDD6" opacity="0.85" />
+        <circle cx="1192" cy="82" r="28" fill="#070a12" />
+      </svg>
+
+      {/* buildings mid */}
+      <svg
+        className="cl-city__layer cl-city__mid"
+        style={{ transform: `translate3d(0, ${midY}px, 0)` }}
+        viewBox="0 0 1440 600"
+        preserveAspectRatio="xMidYMax slice"
+      >
+        {/* far skyline silhouettes */}
+        <g fill="#0e1422">
+          <rect x="40" y="280" width="70" height="220" />
+          <rect x="120" y="240" width="90" height="260" />
+          <rect x="220" y="300" width="60" height="200" />
+          <rect x="320" y="210" width="110" height="290" />
+          <rect x="450" y="260" width="80" height="240" />
+          <rect x="560" y="190" width="100" height="310" />
+          <rect x="680" y="250" width="75" height="250" />
+          <rect x="780" y="200" width="120" height="300" />
+          <rect x="920" y="270" width="70" height="230" />
+          <rect x="1010" y="230" width="95" height="270" />
+          <rect x="1120" y="180" width="130" height="320" />
+          <rect x="1280" y="250" width="100" height="250" />
+        </g>
+        {/* warm windows */}
+        <g className="cl-windows" fill="#C9A84C">
+          {[[130,270],[150,300],[170,340],[340,240],[360,280],[380,320],
+            [580,220],[600,260],[620,300],[800,230],[820,270],[840,310],
+            [1140,210],[1160,250],[1180,290],[1200,330],[1320,280],[1340,320]
+          ].map(([x,y], i) => (
+            <rect
+              key={i}
+              x={x}
+              y={y}
+              width="10"
+              height="14"
+              rx="1"
+              opacity={0.55 + (i % 3) * 0.15}
+              className="cl-window"
+              style={{ animationDelay: `${(i % 8) * 0.35}s` }}
+            />
+          ))}
+        </g>
+        {/* park / trees sage */}
+        <g fill="#7BAF7B" opacity="0.55">
+          <ellipse cx="500" cy="470" rx="40" ry="18" />
+          <ellipse cx="980" cy="475" rx="50" ry="20" />
+        </g>
+      </svg>
+
+      {/* foreground road + streetlights */}
+      <svg
+        className="cl-city__layer cl-city__fg"
+        style={{ transform: `translate3d(0, ${fgY}px, 0)` }}
+        viewBox="0 0 1440 600"
+        preserveAspectRatio="xMidYMax slice"
+      >
+        <path d="M0 500 H1440 V600 H0 Z" fill="#121826" />
+        <path
+          d="M0 520 H1440"
+          stroke="#F5EDD6"
+          strokeOpacity="0.15"
+          strokeWidth="4"
+          strokeDasharray="24 20"
+          className="cl-road-dash"
+        />
+        {/* streetlights */}
+        {[180, 420, 720, 1020, 1300].map((x) => (
+          <g key={x}>
+            <rect x={x} y="430" width="4" height="70" fill="#2a3348" />
+            <circle cx={x + 2} cy="428" r="8" fill="#C9A84C" opacity="0.85" className="cl-lamp" />
+            <ellipse cx={x + 2} cy="500" rx="28" ry="8" fill="#C9A84C" opacity="0.12" />
+          </g>
+        ))}
+      </svg>
+
+      {/* floating issue cards — CSS animated */}
+      <div className="cl-floaters">
+        {[
+          { label: 'Pothole', cat: 'pothole', delay: '0s', x: '12%' },
+          { label: 'Electricity', cat: 'electricity', delay: '1.2s', x: '34%' },
+          { label: 'Water', cat: 'water', delay: '2.1s', x: '58%' },
+          { label: 'Garbage', cat: 'garbage', delay: '0.7s', x: '78%' },
+        ].map((c) => (
+          <div
+            key={c.label}
+            className={`cl-floater cl-floater--${c.cat}`}
+            style={{ left: c.x, animationDelay: c.delay }}
+          >
+            <span className="cl-floater__badge">Pending</span>
+            <strong>{c.label}</strong>
+            <small>Report · nearby</small>
+          </div>
+        ))}
+      </div>
+
+      {/* simple walking citizens + authority van via CSS shapes */}
+      <div className="cl-actors">
+        <div className="cl-walker cl-walker--1" title="Citizen" />
+        <div className="cl-walker cl-walker--2" title="Citizen" />
+        <div className="cl-van" title="Authority response" />
+      </div>
+    </div>
+  );
+}
+
+html {
+  scroll-behavior: smooth;
+}
